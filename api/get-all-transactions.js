@@ -17,10 +17,7 @@ module.exports = async (req, res) => {
   }
 
   try {
-    // Load from shared storage
     const transactions = loadTransactions();
-    
-    // Sort by newest first
     const sortedTransactions = transactions.sort((a, b) => 
       new Date(b.createdAt) - new Date(a.createdAt)
     );

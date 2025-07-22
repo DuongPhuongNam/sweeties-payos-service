@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
       return status;
     };
 
-    // Create new transaction using shared storage
+    // Create transaction using shared storage
     const transaction = {
       orderCode: webhookData.orderCode,
       amount: webhookData.amount,
