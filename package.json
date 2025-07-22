@@ -1,0 +1,28 @@
+{
+  "name": "sweeties-payos-service",
+  "version": "1.0.0",
+  "description": "PayOS payment service for Sweeties Dodging",
+  "main": "api/index.js",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "deploy": "vercel --prod",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "payos",
+    "payment",
+    "sweeties",
+    "dodging"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@payos/node": "^1.0.10",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "@vercel/node": "^5.3.6"
+  }
+}
