@@ -1,6 +1,4 @@
-// In-memory transactions store (shared với webhook)
-// Trong production thật, nên dùng database
-let transactionsStore = [];
+const { loadTransactions } = require("../../lib/storage");
 
 module.exports = async (req, res) => {
   // CORS
@@ -19,24 +17,30 @@ module.exports = async (req, res) => {
   }
 
   try {
+    // Load transactions from shared storage
+    const allTransactions = loadTransactions();
+    
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    const todayTransactions = transactionsStore.filter(t => {
+    const todayTransactions = allTransactions.filter(t => {
       const transactionDate = new Date(t.createdAt);
       return transactionDate >= startOfDay && 
              transactionDate <= endOfDay && 
              t.status === "PAID";
     });
 
-    const totalRevenue = todayTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const totalRevenue = todayTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
     const totalOrders = todayTransactions.length;
+
+    console.log(`📊 Today stats: ${totalOrders} orders, ${totalRevenue} VND`);
 
     res.status(200).json({
       totalRevenue,
       totalOrders,
-      date: today.toDateString()
+      transactions: todayTransactions,
+      date: new Date().toDateString()
     });
   } catch (error) {
     console.error("❌ Stats error:", error);

@@ -1,31 +1,4 @@
-// Import/Export transactions store để share với các endpoints khác
-const fs = require('fs');
-const path = require('path');
-
-// Simple file-based storage (trong production dùng database)
-const STORAGE_FILE = '/tmp/transactions.json';
-
-// Load transactions từ storage
-function loadTransactions() {
-  try {
-    if (fs.existsSync(STORAGE_FILE)) {
-      const data = fs.readFileSync(STORAGE_FILE, 'utf8');
-      return JSON.parse(data);
-    }
-  } catch (error) {
-    console.error('Error loading transactions:', error);
-  }
-  return [];
-}
-
-// Save transactions to storage
-function saveTransactions(transactions) {
-  try {
-    fs.writeFileSync(STORAGE_FILE, JSON.stringify(transactions, null, 2));
-  } catch (error) {
-    console.error('Error saving transactions:', error);
-  }
-}
+const { loadTransactions, saveTransactions, addTransaction } = require("../lib/storage");
 
 module.exports = async (req, res) => {
   // CORS
@@ -54,31 +27,23 @@ module.exports = async (req, res) => {
       return status;
     };
 
-    // Load existing transactions
-    const transactions = loadTransactions();
-
-    // Create new transaction
+    // Create new transaction using shared storage
     const transaction = {
-      id: `tx_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       orderCode: webhookData.orderCode,
       amount: webhookData.amount,
       status: mapStatus(webhookData.status),
       bankName: webhookData.bankCode || webhookData.bankName || "Other",
       channelName: webhookData.channelCode || webhookData.channelName || "Other",
       description: webhookData.description,
-      createdAt: new Date().toISOString(),
       webhookData: webhookData // Store full webhook data for debugging
     };
 
-    // Add to transactions
-    transactions.push(transaction);
+    // Use shared addTransaction function
+    const savedTransaction = addTransaction(transaction);
 
-    // Save transactions
-    saveTransactions(transactions);
+    console.log("💾 Transaction stored:", savedTransaction);
 
-    console.log("💾 Transaction stored:", transaction);
-
-    res.status(200).json({ success: true, transaction });
+    res.status(200).json({ success: true, transaction: savedTransaction });
   } catch (error) {
     console.error("❌ Webhook error:", error);
     res.status(500).json({ error: error.message });
