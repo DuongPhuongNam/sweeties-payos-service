@@ -1,7 +1,5 @@
 const payos = require("../lib/payos");
-
-// In-memory store (sẽ mất khi restart - chỉ dùng cho demo)
-let paymentLinksStore = [];
+const { addPaymentLink } = require("../lib/storage");
 
 module.exports = async (req, res) => {
   // CORS headers
@@ -42,11 +40,8 @@ module.exports = async (req, res) => {
 
     const paymentLink = await payos.createPaymentLink(paymentData);
     
-    // Store in memory
-    paymentLinksStore.push({ 
-      ...paymentLink, 
-      createdAt: new Date().toISOString() 
-    });
+    // Store using shared storage
+    addPaymentLink(paymentLink);
 
     res.status(200).json(paymentLink);
   } catch (error) {
